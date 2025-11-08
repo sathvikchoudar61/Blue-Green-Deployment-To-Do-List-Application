@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List - {{ server_name }} Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-primary: #3b82f6;
+            --blue-secondary: #1d4ed8;
+            --blue-light: #dbeafe;
+            --green-primary: #10b981;
+            --green-secondary: #059669;
+            --green-light: #d1fae5;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .server-banner {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.125rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .server-banner:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .server-banner.blue-server {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(29, 78, 216, 0.95));
+            color: white;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .server-banner.green-server {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .server-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .session-count {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .main-content:hover {
+            box-shadow: var(--shadow-xl);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gray-800), var(--gray-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--gray-500);
+            font-size: 1.125rem;
+            font-weight: 400;
+        }
+
+        .add-todo-form {
+            margin-bottom: 32px;
+            display: flex;
+            gap: 12px;
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .add-todo-form:focus-within {
+            border-color: var(--blue-primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .todo-input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .add-button {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .add-button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .add-button:active {
+            transform: translateY(0);
+        }
+
+        .todo-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .todo-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .todo-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
+            transition: all 0.3s ease;
+        }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--gray-300);
+        }
+
+        .todo-item:hover::before {
+            width: 6px;
+        }
+
+        .todo-item.completed {
+            opacity: 0.8;
+            background: var(--gray-50);
+        }
+
+        .todo-item.completed::before {
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: var(--gray-500);
+        }
+
+        .todo-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            word-break: break-word;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-toggle {
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            margin-top: 24px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            border: 2px dashed var(--gray-300);
+            margin: 20px 0;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: var(--gray-500);
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 24px;
+            }
+            
+            .add-todo-form {
+                flex-direction: column;
+            }
+            
+            .todo-item {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .todo-actions {
+                justify-content: flex-end;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="server-banner {{ server_color }}-server fade-in">
+            <span class="server-icon">
+                {% if server_color == 'blue' %}🔵{% else %}🟢{% endif %}
+            </span>
+            <div>Currently running on {{ server_name }} Server</div>
+            <div class="session-count">Active sessions: {{ active_sessions }}</div>
+        </div>
+        
+        <div class="main-content fade-in">
+            <div class="header">
+                <h1>✨ Task Manager</h1>
+                <p>Stay organized and productive</p>
+            </div>
+        
+        <form class="add-todo-form" method="POST" action="/add">
+            <input type="text" name="todo" class="todo-input" placeholder="What needs to be done?" required>
+            <button type="submit" class="add-button">Add Task</button>
+        </form>
+        
+        {% if todos %}
+            <ul class="todo-list">
+                {% for todo in todos %}
+                    <li class="todo-item {% if todo.completed %}completed{% endif %} fade-in">
+                        <span class="todo-text">{{ todo.text }}</span>
+                        <div class="todo-actions">
+                            <a href="/toggle/{{ todo.id }}" class="btn btn-toggle">
+                                {% if todo.completed %}↩️ Undo{% else %}✅ Complete{% endif %}
+                            </a>
+                            <a href="/delete/{{ todo.id }}" class="btn btn-delete">🗑️ Delete</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <h3>No tasks yet</h3>
+                <p>Add your first task above to get started!</p>
+            </div>
+        {% endif %}
+        
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">{{ todos|length }}</span>
+                    <span class="stat-label">Total Tasks</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ todos|selectattr('completed', 'equalto', true)|list|length }}</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ todos|selectattr('completed', 'equalto', false)|list|length }}</span>
+                    <span class="stat-label">Remaining</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/api/status" class="btn btn-info">📊 View Server Status</a>
+        </div>
+
+<script>
+// Add some interactive enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    // Add fade-in animation to todo items
+    const todoItems = document.querySelectorAll('.todo-item');
+    todoItems.forEach((item, index) => {
+        setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Add pulse animation to server banner
+    const serverBanner = document.querySelector('.server-banner');
+    setInterval(() => {
+        serverBanner.classList.add('pulse');
+        setTimeout(() => {
+            serverBanner.classList.remove('pulse');
+        }, 2000);
+    }, 10000);
+});
+</script>
+    </div>
+</body>
+</html>

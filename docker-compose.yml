@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  blue:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - SERVER_NAME=Blue
+      - SERVER_PORT=5001
+      - SERVER_COLOR=blue
+    volumes:
+      - ./data:/app/data
+    networks:
+      - app-network
+
+  green:
+    build: .
+    ports:
+      - "5002:5001"
+    environment:
+      - SERVER_NAME=Green
+      - SERVER_PORT=5001
+      - SERVER_COLOR=green
+    volumes:
+      - ./data:/app/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
